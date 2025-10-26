@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SUP CASA - Ressources Etudiantes</title>
+    <link rel="icon" href="logo-sup.jpg" type="image/jpeg">
+    <style>
+        body { font-family: 'Segoe UI',Arial,sans-serif; background: #f7fafe; margin: 0; color: #1a2233; }
+        header { background: #056aff; color: #fff; padding: 1.2rem 0; display: flex; align-items: center; gap: 1.3rem; }
+        header img { height: 55px; margin-left: 2.5rem; background: #fff; border-radius: 12px;}
+        header h1 { font-size: 2rem; margin: 0; letter-spacing: 2px; }
+        .container { max-width: 950px; margin: 2rem auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 36px #056aff22; padding:2.5rem 1.5rem;}
+        .tabs { display:flex; gap:1rem; margin-bottom:2rem;}
+        .tab-btn {border:none;background:#eaf2fd;padding:1rem 2.4rem;border-radius:8px;font-size:1.07rem;cursor:pointer;color:#056aff;font-weight:600;transition:.2s;}
+        .tab-btn.active, .tab-btn:hover {background:#056aff;color:#fff;}
+        .hidden {display:none;}
+        /* Admin form */
+        .admin-form label {font-weight:500; margin-top:1rem;display:block;}
+        .admin-form input[type="text"], 
+        .admin-form select {width:100%;font-size:1rem;padding:.7rem;border:1px solid #b6cee5;border-radius:5px;margin-top:.4rem;margin-bottom:1rem;}
+        .admin-form input[type="file"] {margin-top:.6rem;}
+        .admin-form {margin-bottom:1.8rem;}
+        .admin-form button {background:#00c292;color:#fff;border:none;font-size:1rem;padding:.7rem 2.2rem;border-radius:8px;margin:1.2rem 0 0 0;cursor:pointer;}
+        .admin-form button:hover {background:#009360;}
+        /* Ressource cards */
+        .ressource-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.4rem;}
+        .ressource-card {background:#eaf2fd;padding:1.2rem 1.1rem;border-radius:10px;box-shadow:0 2px 12px #056aff14;}
+        .ressource-card span {font-size:.98rem;display:block;margin-bottom:.3em;}
+        .ressource-card strong {color:#056aff;}
+        /* Filtres utilisateurs */
+        .filters { margin-bottom:1.8rem; display:flex;flex-wrap:wrap;gap:1.1rem;}
+        .filters label {font-weight:500;}
+        .filters select {margin-left:.4rem;font-size:1rem;padding:.35rem .7rem;border-radius:5px;border:1px solid #b6cee5;}
+        @media (max-width:700px){header img{margin-left:.7rem;} .container{padding:1rem;} }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo-sup.jpg" alt="Logo SUP CASA">
+        <h1>SUP CASA</h1>
+    </header>
+    <div class="container">
+        <!-- Nav Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('userTab')">Espace Utilisateur</button>
+            <button class="tab-btn" onclick="showTab('adminLoginTab')" id="adminTabBtn">Admin</button>
+        </div>
+        <!-- Utilisateur -->
+        <div id="userTab">
+            <h2>Trouvez vos documents</h2>
+            <div class="filters">
+                <label>
+                    Niveau
+                    <select id="userNiveau" onchange="renderRessources()">
+                        <option value="">Tous</option>
+                        <option value="S1">S1</option>
+                        <option value="S2">S2</option>
+                        <option value="S3">S3</option>
+                        <option value="S4">S4</option>
+                        <option value="S5">S5</option>
+                        <option value="S6">S6</option>
+                        <option value="S7">S7</option>
+                        <option value="S8">S8</option>
+                        <option value="S9">S9</option>
+                    </select>
+                </label>
+                <label>
+                    Matière
+                    <select id="userMatiere" onchange="renderRessources()">
+                        <option value="">Toutes</option>
+                    </select>
+                </label>
+                <label>
+                    Genre
+                    <select id="userGenre" onchange="renderRessources()">
+                        <option value="">Tous</option>
+                        <option value="Cours">Cours</option>
+                        <option value="TD">TD</option>
+                        <option value="Exams">Exams</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <div class="ressource-grid" id="ressourceList"></div>
+            </div>
+        </div>
+        <!-- Admin login (secret panel) -->
+        <div id="adminLoginTab" class="hidden">
+            <h2>Espace Administrateur</h2>
+            <p>Accès réservé</p>
+            <input type="password" id="adminPass" placeholder="Mot de passe admin" style="padding:.6rem 1.4rem;font-size:1rem;border-radius:6px;border:1px solid #b7dafe;">
+            <button onclick="checkAdmin()">Entrer</button>
+            <div id="adminLoginMsg" style="color:red;margin-top:.5rem;"></div>
+        </div>
+        <!-- Admin true panel -->
+        <div id="adminTab" class="hidden">
+            <h2>Ajouter un document</h2>
+            <form class="admin-form" onsubmit="addRessource(event)" autocomplete="off">
+                <label>Titre du document
+                    <input type="text" id="titre" required>
+                </label>
+                <label>Niveau
+                    <select id="niveau" required>
+                        <option value="">Choisir...</option>
+                        <option value="S1">S1</option>
+                        <option value="S2">S2</option>
+                        <option value="S3">S3</option>
+                        <option value="S4">S4</option>
+                        <option value="S5">S5</option>
+                        <option value="S6">S6</option>
+                        <option value="S7">S7</option>
+                        <option value="S8">S8</option>
+                        <option value="S9">S9</option>
+                    </select>
+                </label>
+                <label>Matière
+                    <input type="text" id="matiere" required>
+                </label>
+                <label>Genre
+                    <select id="genre" required>
+                        <option value="">Choisir...</option>
+                        <option value="Cours">Cours</option>
+                        <option value="TD">TD</option>
+                        <option value="Exams">Exams</option>
+                    </select>
+                </label>
+                <label>Importer un fichier (PDF,image,Word…)
+                    <input type="file" id="fichier" accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" required>
+                </label>
+                <button>Publier le document</button>
+            </form>
+            <button onclick="logoutAdmin()" style="background:#f44747;margin-top:.5rem;">Quitter Admin</button>
+        </div>
+    </div>
+    <script>
+        // Pour la démo, stockage local JS. En prod-> utiliser une vraie DB ou stockage serveur sécurisé!
+        let ressources = [];
+        // Recharger depuis localStorage s'il existe
+        if(localStorage.getItem("ressources_supcasa")){
+            ressources = JSON.parse(localStorage.getItem("ressources_supcasa"));
+        }
+        let MATIERES_SET = new Set();
+        // TAB gestion
+        function showTab(tabId){
+            document.getElementById("userTab").classList.add("hidden");
+            document.getElementById("adminLoginTab").classList.add("hidden");
+            document.getElementById("adminTab").classList.add("hidden");
+            document.querySelectorAll(".tab-btn").forEach(btn=>btn.classList.remove("active"));
+            if(tabId==="userTab") document.querySelectorAll(".tab-btn")[0].classList.add("active");
+            if(tabId==="adminLoginTab"||tabId==="adminTab") document.querySelectorAll(".tab-btn")[1].classList.add("active");
+            document.getElementById(tabId).classList.remove("hidden");
+        }
+        // Admin login 
+        function checkAdmin(){
+            const pass=document.getElementById("adminPass").value;
+            if(pass==="sup_casa_encg2007"){
+                document.getElementById("adminLoginTab").classList.add("hidden");
+                document.getElementById("adminTab").classList.remove("hidden");
+                document.getElementById("adminLoginMsg").textContent="";
+                document.getElementById("adminPass").value="";
+            }else{
+                document.getElementById("adminLoginMsg").textContent="Mot de passe incorrect.";
+            }
+        }
+        function logoutAdmin(){
+            showTab("userTab");
+        }
+        // Ajouter doc depuis admin
+        function addRessource(e){
+            e.preventDefault();
+            const titre = document.getElementById("titre").value.trim();
+            const niveau = document.getElementById("niveau").value;
+            const matiere = document.getElementById("matiere").value.trim();
+            const genre = document.getElementById("genre").value;
+            const fichierInput = document.getElementById("fichier");
+            if(!titre||!niveau||!matiere||!genre||!fichierInput.files.length){alert("Champs obligatoires!");return;}
+            const fichier = fichierInput.files[0];
+            // Stockage JS en base64 pour démo; à remplacer par stockage serveur réel!
+            const reader = new FileReader();
+            reader.onload = function(ev){
+                const res = {
+                    titre, niveau, matiere, genre,
+                    fichier_nom: fichier.name,
+                    fichier_type:fichier.type,
+                    fichier_data: ev.target.result, // base64
+                    date: new Date().toISOString().substr(0,10)
+                };
+                ressources.push(res);
+                localStorage.setItem("ressources_supcasa",JSON.stringify(ressources));
+                document.querySelector(".admin-form").reset();
+                updateMatieres();
+                renderRessources();
+                alert("Document publié!");
+            };
+            reader.readAsDataURL(fichier);
+        }
+        // Filtres utilisateur
+        function renderRessources(){
+            updateMatieres();
+            let niveau = document.getElementById("userNiveau").value;
+            let matiere = document.getElementById("userMatiere").value;
+            let genre = document.getElementById("userGenre").value;
+            let filtered = ressources.filter(r=>
+                (!niveau||r.niveau===niveau)
+                && (!matiere||r.matiere===matiere)
+                && (!genre||r.genre===genre)
+            );
+            let list="";
+            if(!filtered.length) list = "<p>Aucun document trouvé...</p>";
+            else{
+                filtered.forEach(r=>{
+                    let icon = "📄";
+                    if(r.fichier_type.startsWith("image/")) icon='🖼️';
+                    else if(r.fichier_nom.endsWith(".pdf")) icon='📕';
+                    else if(r.fichier_nom.match(/\.(doc|docx)$/)) icon='📝';
+                    else if(r.fichier_nom.match(/\.(ppt|pptx)$/)) icon='📊';
+                    else if(r.fichier_nom.match(/\.(xls|xlsx)$/)) icon='📈';
+                    list += `
+                    <div class="ressource-card">
+                        <strong>${icon} ${r.titre}</strong>
+                        <span><b>Niveau :</b> ${r.niveau}, <b>Matière :</b> ${r.matiere}, <b>Type :</b> ${r.genre}</span>
+                        <span><b>Publié :</b> ${r.date}</span>
+                        <a href="${r.fichier_data}" download="${r.fichier_nom}" target="_blank" style="color:#056aff;font-weight:500;">Télécharger</a>
+                    </div>`;
+                })
+            }
+            document.getElementById("ressourceList").innerHTML = list;
+        }
+        // Générer/Mettre à jour liste matières auto depuis data
+        function updateMatieres(){
+            MATIERES_SET.clear();
+            ressources.forEach(r=>MATIERES_SET.add(r.matiere));
+            let matSelect = document.getElementById("userMatiere");
+            let sel = matSelect.value;
+            matSelect.innerHTML = `<option value="">Toutes</option>`;
+            MATIERES_SET.forEach(m=>{
+                let opt=document.createElement("option");
+                opt.value=opt.textContent=m;
+                if(m===sel) opt.selected=true;
+                matSelect.appendChild(opt);
+            });
+        }
+        // Init affichage
+        renderRessources();
+    </script>
+</body>
+</html>
