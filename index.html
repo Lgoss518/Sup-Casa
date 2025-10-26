@@ -35,6 +35,56 @@
         @media (max-width:700px){header img{margin-left:.7rem;} .container{padding:1rem;} }
     </style>
 </head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
+    <script>
+const SUPABASE_URL = 'https://xxxx.supabase.co'; // ton URL Supabase
+const SUPABASE_KEY = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // ta clé anon public
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Nouvelle fonction d’upload via Supabase Storage
+async function uploadDocument(file, titre, niveau, matiere, genre) {
+  const path = `${niveau}/${matiere}/${file.name}`;
+  const { data, error } = await supabase
+    .storage
+    .from('documents') // nom du bucket
+    .upload(path, file, { upsert: false });
+
+  if (error) {
+    alert("Erreur d'upload : " + error.message);
+  } else {
+    const publicURL = supabase
+      .storage
+      .from('documents')
+      .getPublicUrl(path)
+      .publicUrl;
+    alert("Fichier uploadé avec succès !");
+    ressources.push({
+      titre, niveau, matiere, genre,
+      fichier_nom: file.name,
+      fichier_type: file.type,
+      fichier_url: publicURL,
+      date: new Date().toISOString().substr(0,10)
+    });
+    localStorage.setItem("ressources_supcasa",JSON.stringify(ressources));
+    document.querySelector(".admin-form").reset();
+    updateMatieres();
+    renderRessources();
+  }
+}
+
+// Remplace la fonction addRessource par :
+function addRessource(e){
+  e.preventDefault();
+  const titre = document.getElementById("titre").value.trim();
+  const niveau = document.getElementById("niveau").value;
+  const matiere = document.getElementById("matiere").value.trim();
+  const genre = document.getElementById("genre").value;
+  const fichierInput = document.getElementById("fichier");
+  if(!titre||!niveau||!matiere||!genre||!fichierInput.files.length){alert("Champs obligatoires!");return;}
+  const fichier = fichierInput.files[0];
+  uploadDocument(fichier, titre, niveau, matiere, genre);
+}
+</script>
 <body>
     <header>
         <img src="logo-sup.jpg" alt="Logo SUP CASA">
@@ -221,7 +271,7 @@
                         <strong>${icon} ${r.titre}</strong>
                         <span><b>Niveau :</b> ${r.niveau}, <b>Matière :</b> ${r.matiere}, <b>Type :</b> ${r.genre}</span>
                         <span><b>Publié :</b> ${r.date}</span>
-                        <a href="${r.fichier_data}" download="${r.fichier_nom}" target="_blank" style="color:#056aff;font-weight:500;">Télécharger</a>
+                        <a href="${r.fichier_url}" download="${r.fichier_nom}" target="_blank" style="color:#056aff;font-weight:500;">Télécharger</a>
                     </div>`;
                 })
             }
@@ -246,3 +296,4 @@
     </script>
 </body>
 </html>
+
